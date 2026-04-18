@@ -56,7 +56,7 @@ ROOT_URLCONF = "django_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -120,3 +120,6 @@ STATIC_URL = "static/"
 
 
 AUTH_USER_MODEL = 'accounts.CustomUser'     # for custome user
+
+LOGIN_REDIRECT_URL = 'home'                 # for redirect to the home page
+LOGOUT_REDIRECT_URL = 'home'
