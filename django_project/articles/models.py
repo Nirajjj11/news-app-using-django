@@ -15,4 +15,4 @@ class Article(models.Model):
             return self.title
 
       def get_absolute_url(self):
-            return reverse("article_details",kwargs={'pk':self.pk})
+            return reverse("article_detail",kwargs={'pk':self.pk})
