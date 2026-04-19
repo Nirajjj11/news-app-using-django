@@ -35,6 +35,9 @@ ALLOWED_HOSTS = []
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"                    # for bootstarp5
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# for time zone
+TIME_ZONE = 'Asia/Kolkata'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +50,7 @@ INSTALLED_APPS = [
     
     'accounts',         # for account app
     'pages',            # for page app
+    'articles',         # for articles app
     
     'crispy_forms',
     'crispy_bootstrap5',
