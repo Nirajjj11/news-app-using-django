@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tz %}
 
 {% block title %}Articles{% endblock title %}
 
@@ -11,7 +12,7 @@
                   <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
             </span> &middot;
             <span class="text-muted">by {{ article.author }} |
-                  {{ article.date }}</span>
+                  {{ article.date|localtime }}</span>
       </div>
       <div class="card-body">
             {{ article.body }}

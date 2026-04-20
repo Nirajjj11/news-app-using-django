@@ -36,7 +36,8 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"                    # for bootstarp5
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # for time zone
-TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = 'IST'
+USE_TZ = True
 
 # Application definition
 
