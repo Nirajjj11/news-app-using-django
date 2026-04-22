@@ -1,0 +1,89 @@
+
+/* ================= LIGHT THEME ================= */
+:root {
+  --bg: #ffffff;
+  --text: #212529;
+  --card: #f8f9fa;
+
+  --navbar-bg: #ffffff;
+  --nav-text: #000000;
+
+  --link: #0d6efd;
+  --muted: #6c757d;
+}
+
+/* ================= GLOBAL ================= */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+/* ================= NAVBAR ================= */
+.navbar {
+  background-color: var(--navbar-bg) !important;
+}
+
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .dropdown-toggle {
+  color: var(--nav-text) !important;
+}
+
+/* ================= DROPDOWN ================= */
+.dropdown-menu {
+  background-color: var(--navbar-bg);
+}
+
+.dropdown-menu .dropdown-item {
+  color: var(--nav-text);
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+/* ================= CARDS ================= */
+.card {
+  background-color: var(--card);
+  color: var(--text);
+}
+
+/* ARTICLE LINKS */
+.card a {
+  color: var(--link);
+}
+
+/* MUTED TEXT */
+.text-muted {
+  color: var(--muted) !important;
+}
+
+/* ================= DARK MODE ================= */
+body.dark-mode {
+  --bg: #121212;
+  --text: #eaeaea;
+  --card: #1e1e1e;
+
+  --navbar-bg: #1a1a1a;
+  --nav-text: #ffffff;
+
+  --link: #ffd700;
+  --muted: #aaaaaa;
+}
+
+/* ================= ICON FIX ================= */
+#themeToggle i {
+  font-size: 1.2rem;
+  color: var(--nav-text);
+}
+
+body.dark-mode #themeToggle i {
+  color: #ffffff !important;
+}
+
+/* hover effect */
+#themeToggle:hover {
+  transform: scale(1.1);
+  transition: 0.2s;
+}

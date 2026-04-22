@@ -141,3 +141,10 @@ AUTH_USER_MODEL = 'accounts.CustomUser'     # for custome user
 
 LOGIN_REDIRECT_URL = 'home'                 # for redirect to the home page
 LOGOUT_REDIRECT_URL = 'home'
+
+STATIC_URL = '/static/'                     # for static files
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
