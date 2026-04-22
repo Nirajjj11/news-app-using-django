@@ -1,37 +1,102 @@
 from django.views.generic import TemplateView
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from articles.models import Article, Comment
 
-from articles.models import Article
-from .services import get_user_sentiment_summary
+from collections import defaultdict
+from django.db.models.functions import TruncDate
+from django.db.models import Count
 
 User = get_user_model()
 
 
-class UserAnalysisView(TemplateView):
-      template_name = "analysis/user_profile.html"
+class DashboardView(TemplateView):
+      template_name = "analysis/dashboard.html"
 
       def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
 
-            user_id = self.kwargs.get("user_id")
-            user = get_object_or_404(User, id=user_id)
+            # 🔹 Get user
+            user = get_object_or_404(User, id=self.kwargs.get("user_id"))
 
-            articles = Article.objects.filter(author=user).order_by('-date')
-            sentiment_data = get_user_sentiment_summary(user)
+            # 🔹 Query data
+            articles = Article.objects.filter(author=user)
+            comments = Comment.objects.filter(author=user)
 
-            # Optional smart insight
-            if sentiment_data["negative"] > sentiment_data["positive"]:
-                  insight = "User tends to post more negative content"
-            elif sentiment_data["positive"] > sentiment_data["negative"]:
-                  insight = "User tends to post more positive content"
+            # ======================
+            # ✅ ARTICLE SENTIMENT
+            # ======================
+            article_data = {"positive": 0, "negative": 0, "neutral": 0}
+
+            for a in articles:
+                  if a.sentiment == "Positive":
+                        article_data["positive"] += 1
+                  elif a.sentiment == "Negative":
+                        article_data["negative"] += 1
+                  else:
+                        article_data["neutral"] += 1
+
+            # ======================
+            # ✅ COMMENT SENTIMENT
+            # ======================
+            comment_data = {"positive": 0, "negative": 0, "neutral": 0}
+
+            for c in comments:
+                  if c.sentiment == "Positive":
+                        comment_data["positive"] += 1
+                  elif c.sentiment == "Negative":
+                        comment_data["negative"] += 1
+                  else:
+                        comment_data["neutral"] += 1
+
+            # ======================
+            # 📈 TIME-BASED TREND
+            # ======================
+            trend_qs = (
+                  articles
+                  .annotate(day=TruncDate('date'))   # ✅ FIXED
+                  .values('day', 'sentiment')
+                  .annotate(count=Count('id'))
+                  .order_by('day')
+            )
+
+            trend = defaultdict(lambda: {"Positive": 0, "Negative": 0, "Neutral": 0})
+
+            for item in trend_qs:
+                  trend[str(item['day'])][item['sentiment']] = item['count']
+
+            dates = sorted(trend.keys())
+
+            # ======================
+            # 🤖 INSIGHT (MERGED HERE)
+            # ======================
+            positive = articles.filter(sentiment="Positive").count()
+            negative = articles.filter(sentiment="Negative").count()
+
+            if positive > negative:
+                  insight = "User mostly writes positive content 😊"
+            elif negative > positive:
+                  insight = "User tends to write negative content 😐"
             else:
-                  insight = "User has balanced sentiment"
+                  insight = "User has balanced sentiment ⚖️"
 
+            # ======================
+            # 📦 CONTEXT
+            # ======================
             context.update({
                   "profile_user": user,
-                  "articles": articles,
-                  "sentiment_data": sentiment_data,
+
+                  # Sentiment
+                  "article_data": article_data,
+                  "comment_data": comment_data,
+
+                  # Trend
+                  "dates": dates,
+                  "article_positive": [trend[d]["Positive"] for d in dates],
+                  "article_negative": [trend[d]["Negative"] for d in dates],
+                  "article_neutral": [trend[d]["Neutral"] for d in dates],
+
+                  # Insight
                   "insight": insight
             })
 

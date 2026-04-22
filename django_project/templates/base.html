@@ -31,14 +31,10 @@
                               </li>
 
                               {% if user.is_authenticated %}
-                              <li class="nav-item">
-                                    <a class="nav-link active" href="{% url 'user_analysis' user.id %}">
-                                          Analytics
-                                    </a>
+                              
+                                    <a class="nav-link active" aria-current="page" href="{% url 'article_new' %}">+ New</a>
+                                    <a class="nav-link active" aria-current="page" href="{% url 'dashboard' user.id %}">Dashboard</a>
                               </li>
-                              {% endif %}
-                              {% if user.is_authenticated %}
-                              <li><a href="{% url 'article_new' %}" class="nav-link px-2 link-dark">+ New</a></li>
                         </ul>
                         <div class="mr-auto">
                               <ul class="navbar-nav">

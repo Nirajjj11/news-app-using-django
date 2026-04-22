@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+      /* Equal height system */
+      .chart-box {
+            height: 260px;
+      }
+
+      .chart-small {
+            height: 220px;
+      }
+
+      /* Make all cards equal */
+      .card {
+            display: flex;
+            flex-direction: column;
+      }
+
+      .card-body-flex {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+      }
+
+      canvas {
+            width: 100% !important;
+            height: 100% !important;
+      }
+</style>
+
+<div class="container mt-4">
+
+      <!-- 🔹 Title + Insight -->
+      <div class="text-center mb-4">
+            <h2>{{ profile_user.username }} Dashboard 📊</h2>
+
+            <div class="card shadow-sm p-3 mt-3" style="max-width: 400px; margin:auto;">
+                  <h6>🤖 Insight</h6>
+                  <p class="mb-0">{{ insight }}</p>
+            </div>
+      </div>
+
+      <!-- 🔹 MAIN ROW -->
+      <div class="row align-items-stretch">
+
+            <!-- 🔹 LEFT SIDE -->
+            <div class="col-md-4 d-flex flex-column">
+
+                  <!-- Articles Pie -->
+                  <div class="card shadow-sm p-3 mb-4 h-100">
+                        <h6 class="text-center">Articles Sentiment</h6>
+                        <div class="chart-small card-body-flex">
+                              <canvas id="articleChart"></canvas>
+                        </div>
+                  </div>
+
+                  <!-- Comments Pie -->
+                  <div class="card shadow-sm p-3 h-100">
+                        <h6 class="text-center">Comments Sentiment</h6>
+                        <div class="chart-small card-body-flex">
+                              <canvas id="commentChart"></canvas>
+                        </div>
+                  </div>
+
+            </div>
+
+            <!-- 🔹 RIGHT SIDE -->
+            <div class="col-md-8 d-flex flex-column">
+
+                  <!-- Bar Chart -->
+                  <div class="card shadow-sm p-3 mb-4 h-100">
+                        <h6 class="text-center">Articles vs Comments</h6>
+                        <div class="chart-box card-body-flex">
+                              <canvas id="comparisonChart"></canvas>
+                        </div>
+                  </div>
+
+                  <!-- Trend Chart -->
+                  <div class="card shadow-sm p-3 h-100">
+                        <h6 class="text-center">Sentiment Trend</h6>
+                        <div class="chart-box card-body-flex">
+                              <canvas id="trendChart"></canvas>
+                        </div>
+                  </div>
+
+            </div>
+
+      </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+      const colors = {
+            green: 'rgba(142, 228, 175, 0.8)',   // #8ee4af
+            red: 'rgba(255, 154, 162, 0.8)',     // #ff9aa2
+            yellow: 'rgba(255, 217, 125, 0.8)',  // #ffd97d
+            blue: 'rgba(160, 196, 255, 0.8)',    // #a0c4ff
+            purple: 'rgba(205, 180, 219, 0.8)',  // #cdb4db
+            grey: 'rgba(211, 211, 211, 0.8)'     // #d3d3d3
+      };
+
+      // 🔹 PIE - ARTICLES
+      new Chart(document.getElementById('articleChart'), {
+            type: 'pie',
+            data: {
+                  labels: ['Positive', 'Negative', 'Neutral'],
+                  datasets: [{
+                        data: [
+                              {{ article_data.positive }},
+                  {{ article_data.negative }},
+                    {{ article_data.neutral }}
+                ],
+            backgroundColor: [colors.green, colors.red, colors.yellow]
+            }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false
+      }
+    });
+
+      // 🔹 PIE - COMMENTS
+      new Chart(document.getElementById('commentChart'), {
+            type: 'pie',
+            data: {
+                  labels: ['Positive', 'Negative', 'Neutral'],
+                  datasets: [{
+                        data: [
+                              {{ comment_data.positive }},
+                  {{ comment_data.negative }},
+                    {{ comment_data.neutral }}
+                ],
+            backgroundColor: [colors.blue, colors.purple, colors.grey]
+            }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false
+      }
+    });
+
+      // 🔹 BAR CHART
+      new Chart(document.getElementById('comparisonChart'), {
+            type: 'bar',
+            data: {
+                  labels: ['Positive', 'Negative', 'Neutral'],
+                  datasets: [
+                        {
+                              label: 'Articles',
+                              data: [
+                                    {{ article_data.positive }},
+                        {{ article_data.negative }},
+                        {{ article_data.neutral }}
+                    ],
+            backgroundColor: colors.green
+                },
+            {
+                  label: 'Comments',
+                  data: [
+                        {{ comment_data.positive }},
+            {{ comment_data.negative }},
+            {{ comment_data.neutral }}
+                    ],
+            backgroundColor: colors.blue
+                }
+            ]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false
+      }
+    });
+
+      // 🔹 TREND LINE
+      new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                  labels: {{ dates| safe }},
+            datasets: [
+            {
+                  label: 'Positive',
+                  data: {{ article_positive| safe }},
+            borderColor: colors.green,
+            tension: 0.3
+                },
+            {
+                  label: 'Negative',
+                  data: {{ article_negative| safe }},
+            borderColor: colors.red,
+            tension: 0.3
+                },
+            {
+                  label: 'Neutral',
+                  data: {{ article_neutral| safe }},
+            borderColor: colors.yellow,
+            tension: 0.3
+                }
+      ]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false
+      }
+    });
+</script>
+
+{% endblock %}
