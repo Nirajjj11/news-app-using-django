@@ -14,30 +14,29 @@ class HomePageView(TemplateView):
       def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             
-            # 1. Stats for the colored cards
+            # Gather statistics for dashboard cards
             context['article_count'] = Article.objects.count()
             context['comment_count'] = Comment.objects.count()
             context['user_count'] = User.objects.count()
             
-            # 2. Data for the Graph (Grouped by Day)
+            # Query user registration and article creation trends by day
             user_registrations = User.objects.annotate(day=TruncDate('date_joined')) \
                   .values('day').annotate(count=Count('id')).order_by('day')
 
             post_creations = Article.objects.annotate(day=TruncDate('date')) \
                   .values('day').annotate(count=Count('id')).order_by('day')
 
-            # 3. Merging labels (dates) to ensure both datasets align on the X-axis
-            # We collect all unique dates from both users and posts
+            # Align both datasets on consistent date labels for chart visualization
             all_dates = sorted(list(set(
                   [str(x['day']) for x in user_registrations] + 
                   [str(x['day']) for x in post_creations]
             )))
 
-            # Create dictionaries for quick lookup
+            # Create lookup dictionaries for efficient data retrieval
             user_counts = {str(x['day']): x['count'] for x in user_registrations}
             post_counts = {str(x['day']): x['count'] for x in post_creations}
 
-            # Build finalized lists for Chart.js
+            # Prepare chart data with JSON serialization for frontend consumption
             context['chart_labels'] = json.dumps(all_dates)
             context['user_chart_data'] = json.dumps([user_counts.get(date, 0) for date in all_dates])
             context['post_chart_data'] = json.dumps([post_counts.get(date, 0) for date in all_dates])

@@ -6,17 +6,13 @@ from articles.models import Article, Comment
 from collections import defaultdict
 from django.db.models.functions import TruncDate
 from django.db.models import Count
-
-# 🔥 NEW IMPORT
 from textblob import TextBlob
 
 User = get_user_model()
 
 
-# ======================
-# 🔥 SENTIMENT FUNCTION
-# ======================
 def get_sentiment(text):
+      """Analyze text sentiment and classify as Positive, Negative, or Neutral."""
       polarity = TextBlob(text).sentiment.polarity
 
       if polarity > 0.1:
@@ -33,20 +29,15 @@ class DashboardView(TemplateView):
       def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
 
-            # 🔹 Get user
             user = get_object_or_404(User, id=self.kwargs.get("user_id"))
-
-            # 🔹 Query data
             articles = Article.objects.filter(author=user)
             comments = Comment.objects.filter(author=user)
 
-            # ======================
-            # ✅ ARTICLE SENTIMENT (REAL ANALYSIS)
-            # ======================
+            # Analyze sentiment distribution for all user articles
             article_data = {"positive": 0, "negative": 0, "neutral": 0}
 
             for a in articles:
-                  sentiment = get_sentiment(a.body)   # 🔥 FIXED HERE
+                  sentiment = get_sentiment(a.body)
 
                   if sentiment == "Positive":
                         article_data["positive"] += 1
@@ -55,9 +46,7 @@ class DashboardView(TemplateView):
                   else:
                         article_data["neutral"] += 1
 
-            # ======================
-            # ✅ COMMENT SENTIMENT (REAL ANALYSIS)
-            # ======================
+            # Analyze sentiment distribution for all user comments
             comment_data = {"positive": 0, "negative": 0, "neutral": 0}
 
             for c in comments:
@@ -70,18 +59,14 @@ class DashboardView(TemplateView):
                   else:
                         comment_data["neutral"] += 1
 
-            # ======================
-            # 🔥 COMBINED SENTIMENT
-            # ======================
+            # Combine article and comment sentiment metrics
             sentiment_data = {
                   "positive": article_data["positive"] + comment_data["positive"],
                   "negative": article_data["negative"] + comment_data["negative"],
                   "neutral": article_data["neutral"] + comment_data["neutral"],
             }
 
-            # ======================
-            # 📈 TIME-BASED TREND (USING STORED FIELD)
-            # ======================
+            # Retrieve sentiment trends over time using stored sentiment field
             trend_qs = (
                   articles
                   .annotate(day=TruncDate('date'))
@@ -97,9 +82,7 @@ class DashboardView(TemplateView):
 
             dates = sorted(trend.keys())
 
-            # ======================
-            # 🤖 INSIGHT
-            # ======================
+            # Generate sentiment insight based on data distribution
             positive = sentiment_data["positive"]
             negative = sentiment_data["negative"]
 
@@ -108,11 +91,9 @@ class DashboardView(TemplateView):
             elif negative > positive:
                   insight = "User tends to write negative content 😐"
             else:
-                  insight = "User has balanced sentiment ⚖️"
+                  insight = "User has balanced sentiment"
 
-            # ======================
-            # 📦 FINAL CONTEXT
-            # ======================
+            # Compile all dashboard data for template rendering
             context.update({
                   "profile_user": user,
                   "articles": articles,

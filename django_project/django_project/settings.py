@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-# for Email Messaging in console
+# Email configuration using console backend for development
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
@@ -32,10 +32,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"                    # for bootstarp5
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"  # Crispy forms Bootstrap5 support
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# for time zone
+# Timezone configuration
 TIME_ZONE = 'IST'
 USE_TZ = True
 

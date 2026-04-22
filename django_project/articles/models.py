@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.urls import reverse
 
-# Create your models here.
+
 class Article(models.Model):
       title = models.CharField(max_length=255)
       body = models.TextField()
@@ -17,7 +17,7 @@ class Article(models.Model):
       def get_absolute_url(self):
             return reverse("article_detail",kwargs={'pk':self.pk})
       
-      # for sentiment analysis
+      # Stores sentiment classification for display in analysis dashboard
       sentiment = models.CharField(max_length=20, blank=True)
       
 class Comment(models.Model):
@@ -35,6 +35,6 @@ class Comment(models.Model):
       def get_absolute_url(self):
             return reverse("article_list")
       
-      # for sentiment analysis
+      # Stores sentiment classification for display in analysis dashboard
       sentiment = models.CharField(max_length=20, blank=True)
       

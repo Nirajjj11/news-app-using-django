@@ -7,7 +7,7 @@ from .models import Article
 from .forms import CommentForm
 from django.views import View
 
-# for authorization we are using mixin
+# Authorization mixins to enforce user permissions
 from django.contrib.auth.mixins import (
       LoginRequiredMixin,
       UserPassesTestMixin,
