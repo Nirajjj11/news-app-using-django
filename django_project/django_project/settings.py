@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'accounts',         # for account app
     'pages',            # for page app
     'articles',         # for articles app
+    "analysis",         # for analysis app
     
     'crispy_forms',
     'crispy_bootstrap5',

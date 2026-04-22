@@ -17,6 +17,9 @@ class Article(models.Model):
       def get_absolute_url(self):
             return reverse("article_detail",kwargs={'pk':self.pk})
       
+      # for sentiment analysis
+      sentiment = models.CharField(max_length=20, blank=True)
+      
 class Comment(models.Model):
       article = models.ForeignKey(Article, on_delete=models.CASCADE)
       comment = models.CharField(max_length=140)
@@ -31,3 +34,7 @@ class Comment(models.Model):
 
       def get_absolute_url(self):
             return reverse("article_list")
+      
+      # for sentiment analysis
+      sentiment = models.CharField(max_length=20, blank=True)
+      
