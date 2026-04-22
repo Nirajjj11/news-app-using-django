@@ -2,7 +2,7 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 
 sia = SentimentIntensityAnalyzer()
 
-def analyse_sentiment(text):
+def analyze_sentiment(text):
       score = sia.polarity_scores(text)['compoud']
       
       if score >= 0.05:
