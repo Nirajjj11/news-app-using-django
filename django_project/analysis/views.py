@@ -1,20 +1,31 @@
+# Core Django view and authentication imports
 from django.views.generic import TemplateView
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+
+# Application models for sentiment analysis data
 from articles.models import Article, Comment
 
-from collections import defaultdict
-from django.db.models.functions import TruncDate
-from django.db.models import Count
-from textblob import TextBlob
+# Utility imports for data aggregation and sentiment analysis
+from collections import defaultdict  # For efficiently grouping trend data by date
+from django.db.models.functions import TruncDate  # Converts DateTimeField to date for grouping
+from django.db.models import Count  # Database count aggregation
+from textblob import TextBlob  # CRITICAL: Third-party library for sentiment polarity analysis
 
 User = get_user_model()
 
 
 def get_sentiment(text):
-      """Analyze text sentiment and classify as Positive, Negative, or Neutral."""
+      """Analyze text sentiment and classify as Positive, Negative, or Neutral.
+      
+      CRITICAL: Uses TextBlob polarity score (-1 to +1):
+      - Positive: polarity > 0.1
+      - Negative: polarity < -0.1
+      - Neutral: -0.1 to 0.1 (no strong sentiment)
+      """
       polarity = TextBlob(text).sentiment.polarity
 
+      # IMPORTANT: Thresholds determine sentiment classification accuracy
       if polarity > 0.1:
             return "Positive"
       elif polarity < -0.1:
@@ -29,15 +40,19 @@ class DashboardView(TemplateView):
       def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
 
+            # CRITICAL: Fetch user or return 404 - prevents processing non-existent users
             user = get_object_or_404(User, id=self.kwargs.get("user_id"))
+            
+            # IMPORTANT: Retrieve all user-generated content for analysis
             articles = Article.objects.filter(author=user)
             comments = Comment.objects.filter(author=user)
 
-            # Analyze sentiment distribution for all user articles
+            # CRITICAL SECTION: Analyze sentiment distribution for all user articles
+            # This loops through each article and classifies sentiment
             article_data = {"positive": 0, "negative": 0, "neutral": 0}
 
             for a in articles:
-                  sentiment = get_sentiment(a.body)
+                  sentiment = get_sentiment(a.body)  # IMPORTANT: Expensive operation per article
 
                   if sentiment == "Positive":
                         article_data["positive"] += 1
@@ -66,26 +81,31 @@ class DashboardView(TemplateView):
                   "neutral": article_data["neutral"] + comment_data["neutral"],
             }
 
-            # Retrieve sentiment trends over time using stored sentiment field
+            # CRITICAL SECTION: Retrieve sentiment trends over time
+            # NOTE: Uses stored sentiment field from database for performance optimization
             trend_qs = (
                   articles
-                  .annotate(day=TruncDate('date'))
-                  .values('day', 'sentiment')   # uses DB field (fast)
-                  .annotate(count=Count('id'))
-                  .order_by('day')
+                  .annotate(day=TruncDate('date'))  # IMPORTANT: Groups by calendar date
+                  .values('day', 'sentiment')   # Database-level grouping (fast)
+                  .annotate(count=Count('id'))  # Aggregates count per sentiment per day
+                  .order_by('day')  # IMPORTANT: Chronological ordering for visualization
             )
 
+            # IMPORTANT: Initialize defaultdict to handle missing dates gracefully
             trend = defaultdict(lambda: {"Positive": 0, "Negative": 0, "Neutral": 0})
 
+            # Map database results to chart-ready format
             for item in trend_qs:
                   trend[str(item['day'])][item['sentiment']] = item['count']
 
             dates = sorted(trend.keys())
 
-            # Generate sentiment insight based on data distribution
+            # CRITICAL SECTION: Generate user insight based on sentiment distribution
+            # This determines the displayed message on the dashboard
             positive = sentiment_data["positive"]
             negative = sentiment_data["negative"]
 
+            # IMPORTANT: Decision logic for user content analysis
             if positive > negative:
                   insight = "User mostly writes positive content 😊"
             elif negative > positive:
@@ -93,20 +113,24 @@ class DashboardView(TemplateView):
             else:
                   insight = "User has balanced sentiment"
 
-            # Compile all dashboard data for template rendering
+            # CRITICAL SECTION: Compile all dashboard data for template rendering
+            # IMPORTANT: All values here must match template variable names exactly
             context.update({
-                  "profile_user": user,
-                  "articles": articles,
+                  "profile_user": user,  # User object for profile section
+                  "articles": articles,  # User's articles for display
 
+                  # Sentiment breakdown for summary cards
                   "article_data": article_data,
                   "comment_data": comment_data,
                   "sentiment_data": sentiment_data,
 
-                  "dates": dates,
+                  # Time-series data for trend chart visualization
+                  "dates": dates,  # IMPORTANT: X-axis labels for chart
                   "article_positive": [trend[d]["Positive"] for d in dates],
                   "article_negative": [trend[d]["Negative"] for d in dates],
                   "article_neutral": [trend[d]["Neutral"] for d in dates],
 
+                  # User insight message
                   "insight": insight
             })
 
