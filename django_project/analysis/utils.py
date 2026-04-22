@@ -1,12 +1,11 @@
-from nltk.sentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
 
-sia = SentimentIntensityAnalyzer()
+def get_sentiment(text):
+      polarity = TextBlob(text).sentiment.polarity
 
-def analyze_sentiment(text):
-      score = sia.polarity_scores(text)['compoud']
-      
-      if score >= 0.05:
+      if polarity > 0.1:
             return "Positive"
-      elif score <= -0.05:
+      elif polarity < -0.1:
             return "Negative"
-      return "Neutral"
+      else:
+            return "Neutral"
