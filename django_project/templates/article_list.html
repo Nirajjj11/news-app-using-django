@@ -6,7 +6,21 @@
 {% block content %}
 <div class="container">
       <div class="row">
+            <!-- ✅ Show date header only when date changes -->
             {% for article in article_list %}
+            {% ifchanged article.date.date %}
+            <div class="col-12 mt-4">
+                  {% if article.date|date:"Y-m-d" == today %}
+                  <h4 class="text-success fw-bold">Today</h4>
+                  {% else %}
+                  <h4 class="text-muted fw-bold">
+                        {{ article.date|date:"F d, Y" }}
+                  </h4>
+                  {% endif %}
+            </div>
+            {% endifchanged %}
+
+            <!-- ✅ Article Card -->
             <div class="col-md-4 mb-4 d-flex align-items-stretch">
                   <div class="card w-100">
                         <div class="card-header">

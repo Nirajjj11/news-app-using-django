@@ -23,6 +23,7 @@ class ArticleListView(ListView):
       # CRITICAL: Displays all articles publicly (no login required)
       model = Article 
       template_name = "article_list.html"
+      ordering = ['-date']
 
 class ArticleDetailView(LoginRequiredMixin, DetailView):
       # IMPORTANT: Requires login to view article details
