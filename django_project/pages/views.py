@@ -31,23 +31,30 @@ class HomePageView(TemplateView):
 
             post_creations = Article.objects.annotate(day=TruncDate('date')) \
                   .values('day').annotate(count=Count('id')).order_by('day')
+            
+            comment_creations = Comment.objects.annotate(day=TruncDate('created_at')) \
+                  .values('day').annotate(count=Count('id')).order_by('day')
 
             # CRITICAL SECTION: Align both datasets on consistent date labels for chart visualization
             # IMPORTANT: Ensures X-axis alignment between user and article trend lines
             all_dates = sorted(list(set(
                   [str(x['day']) for x in user_registrations] + 
-                  [str(x['day']) for x in post_creations]
+                  [str(x['day']) for x in post_creations]+
+                  [str(x['day']) for x in comment_creations]
             )))
 
             # IMPORTANT: Create lookup dictionaries for efficient O(1) data retrieval per date
             user_counts = {str(x['day']): x['count'] for x in user_registrations}
             post_counts = {str(x['day']): x['count'] for x in post_creations}
+            comment_counts = {str(x['day']): x['count'] for x in comment_creations}
 
             # CRITICAL SECTION: Prepare chart data with JSON serialization for frontend consumption
             # IMPORTANT: JSON format required for Chart.js compatibility
             context['chart_labels'] = json.dumps(all_dates)
             context['user_chart_data'] = json.dumps([user_counts.get(date, 0) for date in all_dates])
             context['post_chart_data'] = json.dumps([post_counts.get(date, 0) for date in all_dates])
+            context['comment_chart_data'] = json.dumps([comment_counts.get(date, 0) for date in all_dates]
+)
             
             return context
 

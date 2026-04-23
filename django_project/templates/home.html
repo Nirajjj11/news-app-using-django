@@ -92,6 +92,7 @@
             const labels = {{ chart_labels| safe }};
             const userData = {{ user_chart_data| safe }};
             const postData = {{ post_chart_data| safe }};
+            const commentData = {{ comment_chart_data| safe }};
 
             new Chart(ctx, {
                   type: 'line',
@@ -113,7 +114,15 @@
                                     backgroundColor: 'rgba(255, 182, 193, 0.2)',
                                     tension: 0.3,
                                     fill: true
-                              }
+                              },
+                              {
+                                    label: 'New Comments',
+                                    data: commentData,
+                                    borderColor: '#E0BB00',
+                                    backgroundColor: 'rgba(200, 140, 128, 0.2)',
+                                    tension: 0.3,
+                                    fill: true
+                              },
                         ]
                   },
                   options: {
