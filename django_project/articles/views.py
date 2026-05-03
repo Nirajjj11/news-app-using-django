@@ -24,6 +24,14 @@ class ArticleListView(ListView):
       model = Article 
       template_name = "article_list.html"
       ordering = ['-date']
+      
+class MyArticleListView(LoginRequiredMixin, ListView):
+      model = Article
+      template_name = "article_list.html"
+      ordering = ['-date']
+
+      def get_queryset(self):
+            return Article.objects.filter(author=self.request.user).order_by('-date')
 
 class ArticleDetailView(LoginRequiredMixin, DetailView):
       # IMPORTANT: Requires login to view article details
