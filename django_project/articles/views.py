@@ -18,7 +18,6 @@ from django.contrib.auth.mixins import (
       UserPassesTestMixin,
 )
 
-
 class ArticleListView(ListView): 
       # CRITICAL: Displays all articles publicly (no login required)
       model = Article 
@@ -97,7 +96,6 @@ class CommentGet(DetailView):
 class CommentPost():  
       # PLACEHOLDER: Will be replaced with proper FormView below
       pass 
-
 
 class ArticleDetailView(LoginRequiredMixin, View):
       # CRITICAL: Hybrid view routing GET and POST to appropriate handlers
