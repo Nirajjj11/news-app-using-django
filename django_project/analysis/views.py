@@ -11,6 +11,7 @@ from collections import defaultdict  # For efficiently grouping trend data by da
 from django.db.models.functions import TruncDate  # Converts DateTimeField to date for grouping
 from django.db.models import Count  # Database count aggregation
 from textblob import TextBlob  # CRITICAL: Third-party library for sentiment polarity analysis
+from nltk.sentiment import SentimentIntensityAnalyzer
 
 User = get_user_model()
 
@@ -18,16 +19,19 @@ def get_sentiment(text):
       """Analyze text sentiment and classify as Positive, Negative, or Neutral.
       
       CRITICAL: Uses TextBlob polarity score (-1 to +1):
-      - Positive: polarity > 0.1
-      - Negative: polarity < -0.1
-      - Neutral: -0.1 to 0.1 (no strong sentiment)
+      - Positive: polarity > 0.5
+      - Negative: polarity < -0.5
+      - Neutral: -0.5 to 0.5 (no strong sentiment)
       """
-      polarity = TextBlob(text).sentiment.polarity
+      sia = SentimentIntensityAnalyzer()
+      polarity = sia.polarity_scores(text)                                    # Updated and give more accurate result
+
+      # polarity = TextBlob(text).sentiment.polarity                          # previous not giving the exact result
 
       # IMPORTANT: Thresholds determine sentiment classification accuracy
-      if polarity > 0.05:
+      if polarity['compound'] > 0.05:
             return "Positive"
-      elif polarity < -0.05:
+      elif polarity['compound'] < -0.05:
             return "Negative"
       else:
             return "Neutral"
