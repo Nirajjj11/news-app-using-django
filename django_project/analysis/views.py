@@ -31,8 +31,10 @@ def get_sentiment(text):
       # IMPORTANT: Thresholds determine sentiment classification accuracy
       if polarity['compound'] > 0.05:
             return "Positive"
+      
       elif polarity['compound'] < -0.05:
             return "Negative"
+      
       else:
             return "Neutral"
 
