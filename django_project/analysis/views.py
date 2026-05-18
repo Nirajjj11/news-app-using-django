@@ -29,10 +29,10 @@ def get_sentiment(text):
       # polarity = TextBlob(text).sentiment.polarity                          # previous not giving the exact result
 
       # IMPORTANT: Thresholds determine sentiment classification accuracy
-      if polarity['compound'] > 0.05:
+      if polarity['compound'] > 1:
             return "Positive"
       
-      elif polarity['compound'] < -0.05:
+      elif polarity['compound'] < -1:
             return "Negative"
       
       else:
