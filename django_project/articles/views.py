@@ -25,6 +25,8 @@ class ArticleListView(ListView):
       ordering = ['-date']
       
 class MyArticleListView(LoginRequiredMixin, ListView):
+      # CRITICAL: Displays all articles by the author (login required)
+      
       model = Article
       template_name = "article_list.html"
       ordering = ['-date']
