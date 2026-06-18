@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 # List and detail generic views for article display
 from django.views.generic import ListView, DetailView
 # Edit views: Create, Update, Delete for article management
@@ -34,16 +34,16 @@ class MyArticleListView(LoginRequiredMixin, ListView):
       def get_queryset(self):
             return Article.objects.filter(author=self.request.user).order_by('-date')
 
-class ArticleDetailView(LoginRequiredMixin, DetailView):
-      # IMPORTANT: Requires login to view article details
-      model = Article
-      template_name = 'article_detail.html'
+# class ArticleDetailView(LoginRequiredMixin, DetailView):
+#       # IMPORTANT: Requires login to view article details
+#       model = Article
+#       template_name = 'article_detail.html'
       
-      def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            # CRITICAL: Inject comment form for template rendering
-            context['form'] = CommentForm() 
-            return context
+#       def get_context_data(self, **kwargs):
+#             context = super().get_context_data(**kwargs)
+#             # CRITICAL: Inject comment form for template rendering
+#             context['form'] = CommentForm() 
+#             return context
 
 class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
       # CRITICAL: Enforces authentication + author-only permission
@@ -99,17 +99,17 @@ class CommentPost():
       # PLACEHOLDER: Will be replaced with proper FormView below
       pass 
 
-class ArticleDetailView(LoginRequiredMixin, View):
-      # CRITICAL: Hybrid view routing GET and POST to appropriate handlers
-      def get(self, request, *args, **kwargs): 
-            # Route GET requests through CommentGet handler
-            view = CommentGet.as_view() 
-            return view(request, *args, **kwargs) 
+# class ArticleDetailView(View):
+#       # CRITICAL: Hybrid view routing GET and POST to appropriate handlers
+#       def get(self, request, *args, **kwargs): 
+#             # Route GET requests through CommentGet handler
+#             view = CommentGet.as_view() 
+#             return view(request, *args, **kwargs) 
       
-      def post(self, request, *args, **kwargs):
-            # Route POST requests through CommentPost handler   
-            view = CommentPost.as_view() 
-            return view(request, *args, **kwargs) 
+#       def post(self, request, *args, **kwargs):
+#             # Route POST requests through CommentPost handler   
+#             view = CommentPost.as_view() 
+#             return view(request, *args, **kwargs) 
 
 class CommentPost(SingleObjectMixin, FormView):
       # CRITICAL: Handles POST request to create new comment
@@ -133,3 +133,28 @@ class CommentPost(SingleObjectMixin, FormView):
       def get_success_url(self): 
             article = self.object 
             return reverse("article_detail", kwargs={"pk": article.pk})   
+      
+class ArticleDetailView(DetailView):
+      model = Article
+      template_name = "article_detail.html"
+
+      def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context["form"] = CommentForm()
+            return context
+
+      def post(self, request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                  return redirect("login")
+
+            self.object = self.get_object()
+
+            form = CommentForm(request.POST)
+
+            if form.is_valid():
+                  comment = form.save(commit=False)
+                  comment.article = self.object
+                  comment.author = request.user
+                  comment.save()
+
+            return redirect("article_detail", pk=self.object.pk)
